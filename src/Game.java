@@ -34,7 +34,8 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	   	{
 	   		while(true)
 	   		{
-	   		   Thread.currentThread().sleep(5);
+	   		   Thread.currentThread();
+			   Thread.sleep(5);
 	            repaint();
 	         }
 	      }
@@ -60,8 +61,11 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	
 		g2d.setFont( new Font("Broadway", Font.BOLD, 50));
 		
-		g2d.drawString("Hello!" , x, y);
-		
+		g2d.setColor(Color.BLACK);
+
+		g2d.drawRect(10, 10, getWidth()/6-15, getHeight()-20);
+		g2d.fillRect(getWidth()/6+5, 10, (int)(getWidth()*(4/6)-40), getHeight()-20);
+		g2d.drawRect((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
 		
 	
 		twoDgraph.drawImage(back, null, 0, 0);

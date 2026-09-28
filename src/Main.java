@@ -3,12 +3,21 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Main extends JFrame{
-	private static final int WIDTH =1800;
-	private static final int HEIGHT=1600;
 	
 	public Main () {
 		super("KeyListener Demo");
-		setSize(WIDTH, HEIGHT);
+		
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice device = ge.getDefaultScreenDevice();
+
+		if (device.isFullScreenSupported()) {
+            device.setFullScreenWindow(this);
+        } else {
+            // Fallback to maximized window if exclusive fullscreen is unsupported
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setVisible(true);
+        }
+
 		Game play = new Game();
 		((Component) play).setFocusable(true);
 		

@@ -28,8 +28,8 @@ public class Main extends JFrame{
 		
 		
 		getContentPane().add(play);
-		
 		setVisible(true);
+		play.requestFocusInWindow();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 	}

@@ -13,8 +13,10 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private int key, x, y; 
 	private Object obj;
 	private ArrayList<Object> objects;
+	private ArrayList<Solid> solids;
+	private ArrayList<Obstacle> obstacles;
 	private Player player;
-
+	private String mouseMode, movementMode;
 	
 	public Game() {
 		new Thread(this).start();	
@@ -25,8 +27,10 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		x=0;
 		y=0;
 		obj=new Object(new Rectangle(10,10,50,50));
-		objects=new ArrayList<Object>();
+		solids=new ArrayList<Solid>();
+		obstacles=new ArrayList<Obstacle>();
 		player=new Player(new Rectangle(100,100,50,100), 5);
+		mouseMode="click";
 	
 	}
 
@@ -74,7 +78,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
-		player.move(objects);
+		player.move(solids);
 		checks();
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
@@ -84,12 +88,18 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	}
 
 	public void drawObjects(Graphics g) {
-		for(Object obj: objects) {
-			g.fillRect(obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height);
+		for(Solid sol: solids) {
+			g.setColor(Color.BLACK);
+			g.fillRect(sol.getRect().x, sol.getRect().y, sol.getRect().width, sol.getRect().height);
+		}
+		for(Obstacle obs: obstacles) {
+			g.setColor(Color.RED);
+			g.fillRect(obs.getRect().x, obs.getRect().y, obs.getRect().width, obs.getRect().height);
 		}
 	}
 
 	public void drawPlayer(Graphics g) {
+		g.setColor(Color.BLACK);
 		g.fillRect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
 	}
 
@@ -97,9 +107,16 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		/* if(player.getRect().intersects(obj.getRect())) {
 			System.out.println("collision");
 		} */
-		for(Object obj: objects) {
-			if(player.getRect().intersects(obj.getRect())) {
-				System.out.println("collision");
+		for(Solid sol: solids) {
+			if(player.getRect().intersects(sol.getRect())) {
+				System.out.println("collision (solid)");
+			}
+		}
+		for(Obstacle obs: obstacles) {
+			if(player.getRect().intersects(obs.getRect())) {
+				System.out.println("collision (obstacle)");
+				player.setX(100);
+				player.setY(100);
 			}
 		}
 	}
@@ -108,7 +125,16 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
-		
+		char keyChar = e.getKeyChar();
+		if(keyChar=='0') {
+			mouseMode="click";
+		}
+		if(keyChar=='1') {
+			mouseMode="solid";
+		}
+		if(keyChar=='2') {
+			mouseMode="obstacle";
+		}
 	}
 
 
@@ -162,7 +188,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		objects.add(new Object(new Rectangle(x,y,50,50)));
+		if(mouseMode.equals("solid")) {
+			solids.add(new Solid(new Rectangle(x,y,50,50)));
+		}
+		if(mouseMode.equals("obstacle")) {
+			obstacles.add(new Obstacle(new Rectangle(x,y,50,50)));
+		}
 	}
 
 

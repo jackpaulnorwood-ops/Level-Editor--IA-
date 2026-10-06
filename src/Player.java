@@ -11,9 +11,9 @@ public class Player extends Object {
         this.speed=speed;
     }
 
-    public boolean canMove(Rectangle nextPosition, ArrayList<Object> objects) {
-        for (Object obj : objects) {
-            if (nextPosition.intersects(obj.getRect())) {
+    public boolean canMove(Rectangle nextPosition, ArrayList<Solid> solids) {
+        for (Solid sol : solids) {
+            if (nextPosition.intersects(sol.getRect())) {
                 return false;
             }
         }
@@ -26,26 +26,26 @@ public class Player extends Object {
     }
 
     public void setMove(char key, boolean pressed) {
-        if(key=='w') {
+        if(key=='w'||key=='W') {
             moveY=pressed?-1:0;
         }
-        if(key=='s') {
+        if(key=='s'||key=='S') {
             moveY=pressed?1:0;
         }
-        if(key=='a') {
+        if(key=='a'||key=='A') {
             moveX=pressed?-1:0;
         }
-        if(key=='d') {
+        if(key=='d'||key=='D') {
             moveX=pressed?1:0;
         }
     }
 
-    public void move(ArrayList<Object> objects) {
+    public void move(ArrayList<Solid> solids) {
         for (int i = 0; i < speed; i++) {
 
             Rectangle nextPosition = getNextPosition(moveX, moveY);
 
-            if (canMove(nextPosition, objects)) {
+            if (canMove(nextPosition, solids)) {
                 setX(nextPosition.x);
                 setY(nextPosition.y);
             } else {

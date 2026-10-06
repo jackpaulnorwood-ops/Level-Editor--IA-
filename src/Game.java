@@ -74,7 +74,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
-		player.move();
+		player.move(objects);
 		checks();
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
@@ -84,8 +84,8 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	}
 
 	public void drawObjects(Graphics g) {
-		for(Object o: objects) {
-			g.fillRect(o.getRect().x, o.getRect().y, o.getRect().width, o.getRect().height);
+		for(Object obj: objects) {
+			g.fillRect(obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height);
 		}
 	}
 
@@ -94,11 +94,11 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	}
 
 	public void checks() {
-		if(player.getRect().intersects(obj.getRect())) {
+		/* if(player.getRect().intersects(obj.getRect())) {
 			System.out.println("collision");
-		}
-		for(Object o: objects) {
-			if(player.getRect().intersects(o.getRect())) {
+		} */
+		for(Object obj: objects) {
+			if(player.getRect().intersects(obj.getRect())) {
 				System.out.println("collision");
 			}
 		}

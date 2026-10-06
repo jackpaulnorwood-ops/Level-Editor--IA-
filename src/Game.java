@@ -189,10 +189,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		if(mouseMode.equals("solid")) {
-			solids.add(new Solid(new Rectangle(x,y,50,50)));
+			Solid sol=new Solid(new Rectangle(x,y,50,50));
+			solids.add(sol);
 		}
 		if(mouseMode.equals("obstacle")) {
-			obstacles.add(new Obstacle(new Rectangle(x,y,50,50)));
+			Obstacle obs=new Obstacle(new Rectangle(x,y,50,50));
+			obstacles.add(obs);
 		}
 	}
 

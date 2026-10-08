@@ -26,11 +26,17 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		key =-1; 
 		x=0;
 		y=0;
-		obj=new Object(new Rectangle(10,10,50,50));
+		obj=new Object(new Rectangle(10,10,50,50), ImageManager.get("blackSquare"));
+		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
 		obstacles=new ArrayList<Obstacle>();
 		player=new Player(new Rectangle(100,100,50,100), 5);
 		mouseMode="click";
+
+		ImageManager.loadImage("brick", "/images/brick.png");
+		ImageManager.loadImage("lava", "/images/lava.png");
+		ImageManager.loadImage("steve", "/images/steve.png");
+		ImageManager.loadImage("blackSquare", "/images/blackSquare.png");
 	
 	}
 
@@ -74,7 +80,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		g2d.drawRect(10, 10, getWidth()/6-15, getHeight()-20);
 		g2d.drawRect(getWidth()/6+5, 10, (int)(getWidth()*(4.0/6.0)-10), getHeight()-20);
 		g2d.drawRect((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
-		g2d.fillRect(obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height);
+		g2d.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
@@ -90,17 +96,17 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	public void drawObjects(Graphics g) {
 		for(Solid sol: solids) {
 			g.setColor(Color.BLACK);
-			g.fillRect(sol.getRect().x, sol.getRect().y, sol.getRect().width, sol.getRect().height);
+			g.drawImage(sol.getImage(), sol.getRect().x, sol.getRect().y, sol.getRect().width, sol.getRect().height, null);
 		}
 		for(Obstacle obs: obstacles) {
 			g.setColor(Color.RED);
-			g.fillRect(obs.getRect().x, obs.getRect().y, obs.getRect().width, obs.getRect().height);
+			g.drawImage(obs.getImage(), obs.getRect().x, obs.getRect().y, obs.getRect().width, obs.getRect().height, null);
 		}
 	}
 
 	public void drawPlayer(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.fillRect(player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height);
+		g.drawImage(player.getImage(), player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height, null);
 	}
 
 	public void checks() {

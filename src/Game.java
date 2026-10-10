@@ -28,7 +28,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		this.addKeyListener(this);
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
-		
+
 		key =-1; 
 		x=0;
 		y=0;
@@ -97,14 +97,17 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	}
 
 	public void drawObjects(Graphics g) {
-		for(Solid sol: solids) {
+		for(Object obj: objects) {
+			g.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
+		}
+		/* for(Solid sol: solids) {
 			g.setColor(Color.BLACK);
-			g.drawImage(sol.getImage(), sol.getRect().x, sol.getRect().y, sol.getRect().width, sol.getRect().height, null);
+			g.drawImage(sol.getImage(), sol.getRect().x, sol.getRect().y, sol.getRec t().width, sol.getRect().height, null);
 		}
 		for(Obstacle obs: obstacles) {
 			g.setColor(Color.RED);
 			g.drawImage(obs.getImage(), obs.getRect().x, obs.getRect().y, obs.getRect().width, obs.getRect().height, null);
-		}
+		} */
 	}
 
 	public void drawPlayer(Graphics g) {
@@ -200,10 +203,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		if(mouseMode.equals("solid")) {
 			Solid sol=new Solid(new Rectangle(x,y,50,50), ImageManager.get("brick"));
 			solids.add(sol);
+			objects.add(sol);
 		}
 		if(mouseMode.equals("obstacle")) {
 			Obstacle obs=new Obstacle(new Rectangle(x,y,50,50), ImageManager.get("lava"));
 			obstacles.add(obs);
+			objects.add(obs);
 		}
 	}
 

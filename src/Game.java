@@ -83,7 +83,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		g2d.drawRect(10, 10, getWidth()/6-15, getHeight()-20);
 		g2d.drawRect(getWidth()/6+5, 10, (int)(getWidth()*(4.0/6.0)-10), getHeight()-20);
 		g2d.drawRect((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
-		g2d.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
+		//g2d.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
@@ -200,13 +200,23 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
+		if(mouseMode.equals("click")) {
+			Rectangle clickRect=new Rectangle(x, y, 1, 1);
+			for(int i = objects.size()-1; i>=0; i--) {
+				Object obj = objects.get(i);
+				if(clickRect.intersects(obj.getRect())) {
+					objects.remove(i);
+					break;
+				}
+			}
+		}
 		if(mouseMode.equals("solid")) {
-			Solid sol=new Solid(new Rectangle(x,y,50,50), ImageManager.get("brick"));
+			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), ImageManager.get("brick"));
 			solids.add(sol);
 			objects.add(sol);
 		}
 		if(mouseMode.equals("obstacle")) {
-			Obstacle obs=new Obstacle(new Rectangle(x,y,50,50), ImageManager.get("lava"));
+			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), ImageManager.get("lava"));
 			obstacles.add(obs);
 			objects.add(obs);
 		}

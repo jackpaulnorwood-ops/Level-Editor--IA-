@@ -19,10 +19,16 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private String mouseMode, movementMode;
 	
 	public Game() {
+		ImageManager.loadImage("brick", "/Images/brick.png");
+		ImageManager.loadImage("lava", "/Images/lava.png");
+		ImageManager.loadImage("steve", "/Images/steve.png");
+		ImageManager.loadImage("blackSquare", "/Images/blackSquare.png");
+
 		new Thread(this).start();	
 		this.addKeyListener(this);
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
+		
 		key =-1; 
 		x=0;
 		y=0;
@@ -30,13 +36,10 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
 		obstacles=new ArrayList<Obstacle>();
-		player=new Player(new Rectangle(100,100,50,100), 5);
+		player=new Player(new Rectangle(100,100,50,100), ImageManager.get("steve"), 5);
 		mouseMode="click";
 
-		ImageManager.loadImage("brick", "/images/brick.png");
-		ImageManager.loadImage("lava", "/images/lava.png");
-		ImageManager.loadImage("steve", "/images/steve.png");
-		ImageManager.loadImage("blackSquare", "/images/blackSquare.png");
+		
 	
 	}
 
@@ -195,11 +198,11 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
 		if(mouseMode.equals("solid")) {
-			Solid sol=new Solid(new Rectangle(x,y,50,50));
+			Solid sol=new Solid(new Rectangle(x,y,50,50), ImageManager.get("brick"));
 			solids.add(sol);
 		}
 		if(mouseMode.equals("obstacle")) {
-			Obstacle obs=new Obstacle(new Rectangle(x,y,50,50));
+			Obstacle obs=new Obstacle(new Rectangle(x,y,50,50), ImageManager.get("lava"));
 			obstacles.add(obs);
 		}
 	}

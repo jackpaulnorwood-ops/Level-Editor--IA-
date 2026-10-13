@@ -17,6 +17,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private ArrayList<Obstacle> obstacles;
 	private Player player;
 	private String mouseMode, movementMode;
+	private Rectangle leftColumn, playView, rightColumn;
 	
 	public Game() {
 		ImageManager.loadImage("brick", "/Images/brick.png");
@@ -32,15 +33,33 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		key =-1; 
 		x=0;
 		y=0;
-		obj=new Object(new Rectangle(10,10,50,50), ImageManager.get("blackSquare"));
+		obj=new Object(new Rectangle(10,10,50,50), "blackSquare");
 		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
 		obstacles=new ArrayList<Obstacle>();
-		player=new Player(new Rectangle(100,100,50,100), ImageManager.get("steve"), 5);
+		player=new Player(new Rectangle(100,100,50,100), "steve", 5);
 		mouseMode="click";
 
-		
+		leftColumn=new Rectangle(10, 10, getWidth()/6-15, getHeight()-20);
+		playView=new Rectangle(getWidth()/6+5, 10, (int)(getWidth()*(4.0/6.0)-10), getHeight()-20);
+		rightColumn=new Rectangle((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
+
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				updateLayout();
+			}
+		});
 	
+	}
+
+	private void updateLayout() {
+		int w = getWidth();
+		int h = getHeight();
+
+		leftColumn.setBounds(10, 10, w / 6 - 15, h - 20);
+		playView.setBounds(w / 6 + 5, 10, (int)(w * 4.0 / 6.0) - 10, h - 20);
+		rightColumn.setBounds((int)(w * 5.0 / 6.0) + 5, 10, w / 6 - 15, h - 20);
 	}
 
 	
@@ -80,9 +99,9 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		
 		g2d.setColor(Color.BLACK);
 
-		g2d.drawRect(10, 10, getWidth()/6-15, getHeight()-20);
-		g2d.drawRect(getWidth()/6+5, 10, (int)(getWidth()*(4.0/6.0)-10), getHeight()-20);
-		g2d.drawRect((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
+		drawRect(leftColumn, g2d);
+		drawRect(playView, g2d);
+		drawRect(rightColumn, g2d);
 		//g2d.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
 
 		drawObjects(g2d);
@@ -98,7 +117,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 	public void drawObjects(Graphics g) {
 		for(Object obj: objects) {
-			g.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
+			g.drawImage(ImageManager.get(obj.getImageID()), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
 		}
 		/* for(Solid sol: solids) {
 			g.setColor(Color.BLACK);
@@ -112,7 +131,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 	public void drawPlayer(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.drawImage(player.getImage(), player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height, null);
+		g.drawImage(ImageManager.get(player.getImageID()), player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height, null);
 	}
 
 	public void checks() {
@@ -131,6 +150,14 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 				player.setY(100);
 			}
 		}
+	}
+
+	public void drawRect(Rectangle rect, Graphics g) {
+		g.drawRect((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
+	}
+
+	public void drawImage(Rectangle rect, String imageID, Graphics g) {
+		g.drawImage(back, x, key, getFocusCycleRootAncestor())
 	}
 
 	//DO NOT DELETE
@@ -211,12 +238,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 			}
 		}
 		if(mouseMode.equals("solid")) {
-			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), ImageManager.get("brick"));
+			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), "brick");
 			solids.add(sol);
 			objects.add(sol);
 		}
 		if(mouseMode.equals("obstacle")) {
-			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), ImageManager.get("lava"));
+			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), "lava");
 			obstacles.add(obs);
 			objects.add(obs);
 		}

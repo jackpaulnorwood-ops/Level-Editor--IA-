@@ -1,5 +1,4 @@
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Player extends Object {
@@ -7,8 +6,8 @@ public class Player extends Object {
     private int moveY=0;
     private int speed;
 
-    public Player(Rectangle rect, BufferedImage image, int speed) {
-        super(rect, image);
+    public Player(Rectangle rect, String imageID, int speed) {
+        super(rect, imageID);
         this.speed=speed;
     }
 

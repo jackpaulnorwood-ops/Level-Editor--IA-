@@ -1,13 +1,12 @@
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 public class Object {
     private Rectangle rect;
-    private BufferedImage image;
+    private String imageID;
 
-    public Object(Rectangle rect, BufferedImage image) {
+    public Object(Rectangle rect, String imageID) {
         this.rect=rect;
-        this.image=image;
+        this.imageID=imageID;
     }
 
     public Rectangle getRect() {
@@ -33,12 +32,12 @@ public class Object {
     public void setH(int h) {
         rect.height=h;
     }
-
-    public BufferedImage getImage() {
-        return image;
+    
+    public String getImageID() {
+        return imageID;
     }
 
-    public void setImage(BufferedImage image) {
-        this.image = image;
+    public void setImageID(String imageID) {
+        this.imageID = imageID;
     }
 }

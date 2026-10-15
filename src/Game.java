@@ -19,12 +19,15 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private Player player;
 	private String mouseMode, movementMode;
 	private Rectangle leftColumn, playView, rightColumn;
+	private Boolean cursorInScreen;
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
 	private String selectedImageID = "brick";
 	
 	public Game() {
+		setBackground(new Color(22,13,193));
+
 		ImageManager.loadImage("brick", "/Images/brick.png");
 		ImageManager.loadImage("lava", "/Images/lava.png");
 		ImageManager.loadImage("steve", "/Images/steve.png");
@@ -63,6 +66,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		obstacles=new ArrayList<Obstacle>();
 		player=new Player(new Rectangle(100,100,50,100), "steve", 5);
 		mouseMode="click";
+		cursorInScreen=false;
 
 		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
 		playView=new Rectangle(w/6+5, 10, (int)(w*(4.0/6.0)-10), h-20);

@@ -4,13 +4,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.awt.event.*; 
+import java.util.LinkedHashMap;
 
 
 public class Game  extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
 
 	
 	private BufferedImage back; 
-	private int key, x, y; 
+	private int key, x, y, w, h; 
 	private Object obj;
 	private ArrayList<Object> objects;
 	private ArrayList<Solid> solids;
@@ -18,12 +19,33 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private Player player;
 	private String mouseMode, movementMode;
 	private Rectangle leftColumn, playView, rightColumn;
+
+	private JScrollPane assetScrollPane;
+	private JPanel assetPanel;
+	private String selectedImageID = "brick";
 	
 	public Game() {
 		ImageManager.loadImage("brick", "/Images/brick.png");
 		ImageManager.loadImage("lava", "/Images/lava.png");
 		ImageManager.loadImage("steve", "/Images/steve.png");
 		ImageManager.loadImage("blackSquare", "/Images/blackSquare.png");
+
+		setLayout(null);
+
+		assetPanel = new JPanel();
+		assetPanel.setLayout(new BoxLayout(assetPanel, BoxLayout.Y_AXIS));
+
+		assetScrollPane = new JScrollPane(assetPanel);
+		assetScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+		);
+		assetScrollPane.setHorizontalScrollBarPolicy(
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+		);
+
+		add(assetScrollPane);
+
+		updateAssetSidebar();
 
 		new Thread(this).start();	
 		this.addKeyListener(this);
@@ -33,6 +55,8 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		key =-1; 
 		x=0;
 		y=0;
+		w=0;
+		h=0;
 		obj=new Object(new Rectangle(10,10,50,50), "blackSquare");
 		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
@@ -40,9 +64,9 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		player=new Player(new Rectangle(100,100,50,100), "steve", 5);
 		mouseMode="click";
 
-		leftColumn=new Rectangle(10, 10, getWidth()/6-15, getHeight()-20);
-		playView=new Rectangle(getWidth()/6+5, 10, (int)(getWidth()*(4.0/6.0)-10), getHeight()-20);
-		rightColumn=new Rectangle((int)(getWidth()*(5.0/6.0)+5), 10, getWidth()/6-15, getHeight()-20);
+		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
+		playView=new Rectangle(w/6+5, 10, (int)(w*(4.0/6.0)-10), h-20);
+		rightColumn=new Rectangle((int)(w*(5.0/6.0)+5), 10, w/6-15, h-20);
 
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -54,12 +78,14 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	}
 
 	private void updateLayout() {
-		int w = getWidth();
-		int h = getHeight();
+		w = getWidth();
+		h = getHeight();
 
 		leftColumn.setBounds(10, 10, w / 6 - 15, h - 20);
 		playView.setBounds(w / 6 + 5, 10, (int)(w * 4.0 / 6.0) - 10, h - 20);
 		rightColumn.setBounds((int)(w * 5.0 / 6.0) + 5, 10, w / 6 - 15, h - 20);
+
+		assetScrollPane.setBounds(leftColumn);
 	}
 
 	
@@ -84,17 +110,11 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	
 	
 	
-	public void paint(Graphics g){
-		
-		Graphics2D twoDgraph = (Graphics2D) g; 
-		if( back ==null)
-			back=(BufferedImage)( (createImage(getWidth(), getHeight()))); 
-		
+	protected void paintComponent(Graphics g){
+		super.paintComponent(g);
 
-		Graphics g2d = back.createGraphics();
-	
-		g2d.clearRect(0,0,getSize().width, getSize().height);
-	
+		Graphics2D g2d = (Graphics2D) g;
+		
 		g2d.setFont( new Font("Courier", Font.PLAIN, 24));
 		
 		g2d.setColor(Color.BLACK);
@@ -110,14 +130,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		checks();
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
-	
-		twoDgraph.drawImage(back, null, 0, 0);
 
 	}
 
 	public void drawObjects(Graphics g) {
 		for(Object obj: objects) {
-			g.drawImage(ImageManager.get(obj.getImageID()), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
+			drawImage(obj.getImageID(), obj.getRect(), g);
 		}
 		/* for(Solid sol: solids) {
 			g.setColor(Color.BLACK);
@@ -131,7 +149,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 	public void drawPlayer(Graphics g) {
 		g.setColor(Color.BLACK);
-		g.drawImage(ImageManager.get(player.getImageID()), player.getRect().x, player.getRect().y, player.getRect().width, player.getRect().height, null);
+		drawImage(player.getImageID(), player.getRect(), g);
 	}
 
 	public void checks() {
@@ -156,8 +174,50 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		g.drawRect((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
 	}
 
-	public void drawImage(Rectangle rect, String imageID, Graphics g) {
-		g.drawImage(back, x, key, getFocusCycleRootAncestor())
+	public void drawImage(String imageID, Rectangle rect, Graphics g) {
+		g.drawImage(ImageManager.get(imageID), (int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight(), null);
+	}
+
+	private void updateAssetSidebar() {
+		assetPanel.removeAll();
+
+		for (String id : ImageManager.imageKeyList()) {
+			BufferedImage image = ImageManager.get(id);
+
+			if (image == null) {
+				continue;
+			}
+
+			// Create a button for this image
+			JButton button = new JButton(id);
+
+			// Scale the thumbnail to fit the button
+			Image thumbnail = image.getScaledInstance(
+				80, 80, Image.SCALE_SMOOTH
+			);
+
+			button.setIcon(new ImageIcon(thumbnail));
+			button.setHorizontalTextPosition(
+				SwingConstants.CENTER
+			);
+			button.setVerticalTextPosition(
+				SwingConstants.BOTTOM
+			);
+
+			button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+			// Remember which asset the user selected
+			button.addActionListener(e -> {
+				selectedImageID = id;
+				System.out.println("Selected asset: " + id);
+			});
+
+			assetPanel.add(button);
+			assetPanel.add(Box.createVerticalStrut(5));
+		}
+
+		assetPanel.revalidate();
+		assetPanel.repaint();
 	}
 
 	//DO NOT DELETE
@@ -173,6 +233,13 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		}
 		if(keyChar=='2') {
 			mouseMode="obstacle";
+		}
+		if(keyChar=='u') {
+			String id = ImageManager.uploadImage();
+
+			if (id != null) {
+				updateAssetSidebar();
+			}
 		}
 	}
 

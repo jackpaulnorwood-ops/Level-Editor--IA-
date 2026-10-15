@@ -1,14 +1,15 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ImageManager {
 
-    private static HashMap<String, BufferedImage> images = new HashMap<>();
+    private static LinkedHashMap<String, BufferedImage> images = new LinkedHashMap<>();
 
     public static void loadImage(String name, String path) {
         try {
@@ -32,7 +33,7 @@ public class ImageManager {
 
         int result = chooser.showOpenDialog(null);
 
-        if(result==JFileChooser.APPROVE_OPTION) {
+        if(result!=JFileChooser.APPROVE_OPTION) {
             return null;
         }
 
@@ -58,5 +59,9 @@ public class ImageManager {
 
     public static BufferedImage get(String name) {
         return images.get(name);
+    }
+
+    public static ArrayList<String> imageKeyList() {
+        return new ArrayList<>(images.keySet());
     }
 }

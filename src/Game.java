@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.util.LinkedHashMap;
 
 
-public class Game  extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
+public class Game  extends JPanel implements KeyListener, MouseListener, MouseMotionListener{
 
 	
 	private BufferedImage back; 
@@ -23,6 +23,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
+	private Timer gameTimer;
 	private String selectedImageID = "brick";
 	
 	public Game() {
@@ -50,7 +51,6 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		updateAssetSidebar();
 
-		new Thread(this).start();	
 		this.addKeyListener(this);
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
@@ -68,6 +68,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		mouseMode="click";
 		cursorInScreen=false;
 		gravity=true;
+		gameTimer = new Timer(16, e -> updateGame());
 
 		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
 		playView=new Rectangle(w/6+5, 10, (int)(w*(4.0/6.0)-10), h-20);
@@ -79,6 +80,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 				updateLayout();
 			}
 		});
+		gameTimer.start();
 	
 	}
 
@@ -92,26 +94,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		assetScrollPane.setBounds(leftColumn);
 	}
-
+	private void updateGame() {
+		player.move(solids, gravity);
+		checks();
+		repaint();
+	}
 	
-	
-	public void run()
-	   {
-	   	try
-	   	{
-	   		while(true)
-	   		{
-	   		   Thread.currentThread();
-			   Thread.sleep(5);
-	            repaint();
-	         }
-	      }
-	   		catch(Exception e)
-	      {
-	      }
-	  	}
-	
-
 	
 	
 	
@@ -131,8 +119,6 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
-		player.move(solids, gravity);
-		checks();
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
 
@@ -265,7 +251,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		player.setMove(e.getKeyChar(), true, gravity);
 		System.out.println("key pressed: "+e.getKeyChar());
 		
-		if (key==KeyEvent.VK_SPACE||key==KeyEvent.VK_W) {
+		if (key==KeyEvent.VK_SPACE) {
 			player.jump(gravity);
 		}
 	
@@ -311,6 +297,8 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 				Object obj = objects.get(i);
 				if(clickRect.intersects(obj.getRect())) {
 					objects.remove(i);
+					solids.remove(obj);
+					obstacles.remove(obj);
 					break;
 				}
 			}

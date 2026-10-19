@@ -36,12 +36,18 @@ public class Player extends Object {
         if(key=='d'||key=='D') {
             moveX=pressed?1:0;
         }
-        if(!gravityOn) {
-            if(key=='w'||key=='W') {
-                moveY=pressed?-1:0;
+        if(key=='w'||key=='W') {
+            if (pressed && !gravityOn) {
+                moveY=-1;
+            } else if (!pressed && moveY==-1) {
+                moveY=0;
             }
-            if(key=='s'||key=='S') {
-                moveY=pressed?1:0;
+        }
+        if(key=='s'||key=='S') {
+            if (pressed && !gravityOn) {
+                moveY=1;
+            } else if (!pressed && moveY==1) {
+                moveY=0;
             }
         }
     }
@@ -49,7 +55,8 @@ public class Player extends Object {
     public void move(ArrayList<Solid> solids, boolean gravityOn) {
         for (int i = 0; i < speed; i++) {
 
-            Rectangle nextPosition = getNextPosition(moveX, moveY);
+            int verticalMove = gravityOn ? 0 : moveY;
+            Rectangle nextPosition = getNextPosition(moveX, verticalMove);
 
             if (canMove(nextPosition, solids)) {
                 setX(nextPosition.x);
@@ -86,6 +93,7 @@ public class Player extends Object {
     public void jump(boolean gravityOn) {
         if(gravityOn && onGround) {
             vY=-15;
+            onGround=false;
         }
     }
 }

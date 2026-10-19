@@ -17,9 +17,9 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	private ArrayList<Solid> solids;
 	private ArrayList<Obstacle> obstacles;
 	private Player player;
-	private String mouseMode, movementMode;
+	private String mouseMode;
 	private Rectangle leftColumn, playView, rightColumn;
-	private Boolean cursorInScreen;
+	private Boolean cursorInScreen, gravity;
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
@@ -64,9 +64,10 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
 		obstacles=new ArrayList<Obstacle>();
-		player=new Player(new Rectangle(100,100,50,100), "steve", 5);
+		player=new Player(new Rectangle(500,100,50,100), "steve", 5, 0.5);
 		mouseMode="click";
 		cursorInScreen=false;
+		gravity=true;
 
 		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
 		playView=new Rectangle(w/6+5, 10, (int)(w*(4.0/6.0)-10), h-20);
@@ -130,7 +131,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 
 		drawObjects(g2d);
 		drawPlayer(g2d);
-		player.move(solids);
+		player.move(solids, gravity);
 		checks();
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
@@ -245,6 +246,9 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 				updateAssetSidebar();
 			}
 		}
+		if(keyChar=='g') {
+			gravity=!gravity;
+		}
 	}
 
 
@@ -258,9 +262,12 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 		key= e.getKeyCode();
 		System.out.println(key);
 		
-		player.setMove(e.getKeyChar(), true);
+		player.setMove(e.getKeyChar(), true, gravity);
 		System.out.println("key pressed: "+e.getKeyChar());
 		
+		if (key==KeyEvent.VK_SPACE||key==KeyEvent.VK_W) {
+			player.jump(gravity);
+		}
 	
 	}
 
@@ -269,7 +276,7 @@ public class Game  extends JPanel implements Runnable, KeyListener, MouseListene
 	@Override
 	public void keyReleased(KeyEvent e) {
 		
-		player.setMove(e.getKeyChar(), false);
+		player.setMove(e.getKeyChar(), false, gravity);
 		
 		
 	}

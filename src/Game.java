@@ -159,6 +159,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 				player.setY(100);
 			}
 		}
+
 	}
 
 	public void drawRect(Rectangle rect, Graphics g) {
@@ -210,6 +211,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		assetPanel.revalidate();
 		assetPanel.repaint();
 	}
+	
 
 	//DO NOT DELETE
 	@Override

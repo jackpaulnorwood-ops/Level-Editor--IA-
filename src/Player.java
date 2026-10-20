@@ -2,12 +2,14 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 
 public class Player extends Object {
+    private static final int JUMP_BUFFER_FRAMES = 8;
     private int moveX=0;
     private int moveY=0;
     private int speed;
     private double gravity;
     private double vY;
     private boolean onGround;
+    private int jumpBufferFrames;
 
     public Player(Rectangle rect, String imageID, int speed, double gravity) {
         super(rect, imageID);
@@ -84,16 +86,26 @@ public class Player extends Object {
 
                 setY(nextPosition.y);
             }
+
+            if(jumpBufferFrames > 0) {
+                if(onGround) {
+                    vY=-15;
+                    onGround=false;
+                    jumpBufferFrames=0;
+                } else {
+                    jumpBufferFrames--;
+                }
+            }
         } else {
             vY = 0;
             onGround = false;
+            jumpBufferFrames=0;
         }
     }
 
     public void jump(boolean gravityOn) {
-        if(gravityOn && onGround) {
-            vY=-15;
-            onGround=false;
+        if(gravityOn) {
+            jumpBufferFrames=JUMP_BUFFER_FRAMES;
         }
     }
 }

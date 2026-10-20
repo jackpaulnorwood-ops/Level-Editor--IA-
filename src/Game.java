@@ -306,14 +306,18 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 			}
 		}
 		if(mouseMode.equals("solid")) {
-			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), "brick");
-			solids.add(sol);
-			objects.add(sol);
+			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), selectedImageID);
+			if(playView.contains(sol.getRect())) {
+				solids.add(sol);
+				objects.add(sol);
+			}
 		}
 		if(mouseMode.equals("obstacle")) {
-			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), "lava");
-			obstacles.add(obs);
-			objects.add(obs);
+			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), selectedImageID);
+			if(playView.contains(obs.getRect())) {
+				obstacles.add(obs);
+				objects.add(obs);
+			}
 		}
 	}
 

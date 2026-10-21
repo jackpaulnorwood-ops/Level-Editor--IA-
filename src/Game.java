@@ -290,11 +290,13 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		int mouseX=e.getX();
 		int mouseY=e.getY();
 
-		Rectangle objRect=selectedObject.getRect();
+		if(selectedObject!=null) {
+			Rectangle objRect=selectedObject.getRect();
 
-		if(mouseMode.equals("click")&&objRect.contains(mouseX, mouseY)) {
-			selectedObject.setX(mouseX-objRect.width/2);
-			selectedObject.setY(mouseY-objRect.height/2);
+			if(mouseMode.equals("click")&&objRect.contains(mouseX, mouseY)) {
+				selectedObject.setX(mouseX-objRect.width/2);
+				selectedObject.setY(mouseY-objRect.height/2);
+			}
 		}
 
 		repaint();

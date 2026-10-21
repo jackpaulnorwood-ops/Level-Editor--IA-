@@ -64,7 +64,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		objects=new ArrayList<Object>();
 		solids=new ArrayList<Solid>();
 		obstacles=new ArrayList<Obstacle>();
-		player=new Player(new Rectangle(500,100,50,100), "steve", 5, 0.5);
+		player=new Player(new Point(500, 100), 50, 100, "steve", 5, 1);
 		mouseMode="click";
 		cursorInScreen=false;
 		gravity=true;
@@ -143,23 +143,17 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		drawImage(player.getImageID(), player.getRect(), g);
 	}
 
+	public void resetPlayer() {
+		player.setX(player.getSpawn().x);
+		player.setY(player.getSpawn().y);
+	}
+
 	public void checks() {
-		/* if(player.getRect().intersects(obj.getRect())) {
-			System.out.println("collision");
-		} */
-		for(Solid sol: solids) {
-			if(player.getRect().intersects(sol.getRect())) {
-				System.out.println("collision (solid)");
-			}
-		}
 		for(Obstacle obs: obstacles) {
 			if(player.getRect().intersects(obs.getRect())) {
-				System.out.println("collision (obstacle)");
-				player.setX(100);
-				player.setY(100);
+				resetPlayer();
 			}
 		}
-
 	}
 
 	public void drawRect(Rectangle rect, Graphics g) {

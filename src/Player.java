@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
@@ -6,15 +7,20 @@ public class Player extends Object {
     private int moveX=0;
     private int moveY=0;
     private int speed;
+    private Point spawn;
     private double gravity;
     private double vY;
     private boolean onGround;
     private int jumpBufferFrames;
 
-    public Player(Rectangle rect, String imageID, int speed, double gravity) {
-        super(rect, imageID);
+    public Player(Point spawn, int w, int h, String imageID, int speed, double gravity) {
+        super(new Rectangle(spawn.x, spawn.y, w, h), imageID);
         this.speed=speed;
         this.gravity=gravity;
+        this.spawn=spawn;
+
+        setX(spawn.x);
+        setY(spawn.y);
     }
 
     public boolean canMove(Rectangle nextPosition, ArrayList<Solid> solids) {
@@ -107,5 +113,65 @@ public class Player extends Object {
         if(gravityOn) {
             jumpBufferFrames=JUMP_BUFFER_FRAMES;
         }
+    }
+
+    public static int getJumpBufferFrames() {
+        return JUMP_BUFFER_FRAMES;
+    }
+
+    public int getMoveX() {
+        return moveX;
+    }
+
+    public void setMoveX(int moveX) {
+        this.moveX = moveX;
+    }
+
+    public int getMoveY() {
+        return moveY;
+    }
+
+    public void setMoveY(int moveY) {
+        this.moveY = moveY;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public Point getSpawn() {
+        return spawn;
+    }
+
+    public void setSpawn(Point spawn) {
+        this.spawn = spawn;
+    }
+
+    public double getGravity() {
+        return gravity;
+    }
+
+    public void setGravity(double gravity) {
+        this.gravity = gravity;
+    }
+
+    public double getvY() {
+        return vY;
+    }
+
+    public void setvY(double vY) {
+        this.vY = vY;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
     }
 }

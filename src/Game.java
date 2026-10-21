@@ -13,9 +13,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 	private BufferedImage back; 
 	private int key, x, y, w, h; 
 	private Object obj;
-	private ArrayList<Object> objects;
-	private ArrayList<Solid> solids;
-	private ArrayList<Obstacle> obstacles;
+	private Level level;
 	private Player player;
 	private String mouseMode;
 	private Rectangle leftColumn, playView, rightColumn;
@@ -61,9 +59,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		w=0;
 		h=0;
 		obj=new Object(new Rectangle(10,10,50,50), "blackSquare");
-		objects=new ArrayList<Object>();
-		solids=new ArrayList<Solid>();
-		obstacles=new ArrayList<Obstacle>();
+		level=new Level();
 		player=new Player(new Point(500, 100), 50, 100, "steve", 5, 1);
 		mouseMode="click";
 		cursorInScreen=false;
@@ -97,7 +93,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 	}
 	private void updateGame() {
 		if(playMode) {
-			player.move(solids, gravity);
+			player.move(level.getSolids(), gravity);
 			checks();
 		}
 
@@ -129,17 +125,9 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 	}
 
 	public void drawObjects(Graphics g) {
-		for(Object obj: objects) {
+		for(Object obj: level.getObjects()) {
 			drawImage(obj.getImageID(), obj.getRect(), g);
 		}
-		/* for(Solid sol: solids) {
-			g.setColor(Color.BLACK);
-			g.drawImage(sol.getImage(), sol.getRect().x, sol.getRect().y, sol.getRec t().width, sol.getRect().height, null);
-		}
-		for(Obstacle obs: obstacles) {
-			g.setColor(Color.RED);
-			g.drawImage(obs.getImage(), obs.getRect().x, obs.getRect().y, obs.getRect().width, obs.getRect().height, null);
-		} */
 	}
 
 	public void drawPlayer(Graphics g) {
@@ -153,7 +141,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 	}
 
 	public void checks() {
-		for(Obstacle obs: obstacles) {
+		for(Obstacle obs: level.getObstacles()) {
 			if(player.getRect().intersects(obs.getRect())) {
 				resetPlayer();
 			}
@@ -296,12 +284,10 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		// TODO Auto-generated method stub
 		if(mouseMode.equals("click")) {
 			Rectangle clickRect=new Rectangle(x, y, 1, 1);
-			for(int i = objects.size()-1; i>=0; i--) {
-				Object obj = objects.get(i);
+			for(int i = level.getObjects().size()-1; i>=0; i--) {
+				Object obj = level.getObjects().get(i);
 				if(clickRect.intersects(obj.getRect())) {
-					objects.remove(i);
-					solids.remove(obj);
-					obstacles.remove(obj);
+					level.removeObject(obj);
 					break;
 				}
 			}
@@ -309,15 +295,13 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		if(mouseMode.equals("solid")) {
 			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), selectedImageID);
 			if(playView.contains(sol.getRect())) {
-				solids.add(sol);
-				objects.add(sol);
+				level.addSolid(sol);
 			}
 		}
 		if(mouseMode.equals("obstacle")) {
 			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), selectedImageID);
 			if(playView.contains(obs.getRect())) {
-				obstacles.add(obs);
-				objects.add(obs);
+				level.addObstacle(obs);
 			}
 		}
 	}

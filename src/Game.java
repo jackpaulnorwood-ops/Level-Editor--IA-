@@ -287,7 +287,17 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+		int mouseX=e.getX();
+		int mouseY=e.getY();
+
+		Rectangle objRect=selectedObject.getRect();
+
+		if(mouseMode.equals("click")&&objRect.contains(mouseX, mouseY)) {
+			selectedObject.setX(mouseX-objRect.width/2);
+			selectedObject.setY(mouseY-objRect.height/2);
+		}
+
+		repaint();
 	}
 
 

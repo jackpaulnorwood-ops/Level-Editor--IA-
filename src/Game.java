@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.util.LinkedHashMap;
 
 
-public class Game  extends JPanel implements KeyListener, MouseListener, MouseMotionListener{
+public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 	
 	private BufferedImage back; 
@@ -49,7 +49,6 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 
 		updateAssetSidebar();
 
-		this.addKeyListener(this);
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 
@@ -65,6 +64,9 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		cursorInScreen=false;
 		gravity=true;
 		playMode = false;
+
+		setupKeyBindings();
+
 		gameTimer = new Timer(16, e -> updateGame());
 
 		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
@@ -197,67 +199,77 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		assetPanel.revalidate();
 		assetPanel.repaint();
 	}
-	
 
-	//DO NOT DELETE
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		char keyChar = e.getKeyChar();
-		if(keyChar=='0') {
-			mouseMode="click";
-		}
-		if(keyChar=='1') {
-			mouseMode="solid";
-		}
-		if(keyChar=='2') {
-			mouseMode="obstacle";
-		}
-		if(keyChar=='u') {
-			String id = ImageManager.uploadImage();
+	private void setupKeyBindings() {
+		InputMap input = getInputMap(
+			JComponent.WHEN_IN_FOCUSED_WINDOW
+		);
+		ActionMap actions = getActionMap();
 
-			if (id != null) {
-				updateAssetSidebar();
+		// Movement: A and D
+		bindKey(input, actions, "pressed A", "leftPressed",
+			() -> player.setMove('a', true, gravity));
+		bindKey(input, actions, "released A", "leftReleased",
+			() -> player.setMove('a', false, gravity));
+
+		bindKey(input, actions, "pressed D", "rightPressed",
+			() -> player.setMove('d', true, gravity));
+		bindKey(input, actions, "released D", "rightReleased",
+			() -> player.setMove('d', false, gravity));
+
+		// Vertical movement when gravity is disabled
+		bindKey(input, actions, "pressed W", "upPressed",
+			() -> player.setMove('w', true, gravity));
+		bindKey(input, actions, "released W", "upReleased",
+			() -> player.setMove('w', false, gravity));
+
+		bindKey(input, actions, "pressed S", "downPressed",
+			() -> player.setMove('s', true, gravity));
+		bindKey(input, actions, "released S", "downReleased",
+			() -> player.setMove('s', false, gravity));
+
+		// Jump
+		bindKey(input, actions, "pressed SPACE", "jump",
+			() -> player.jump(gravity));
+
+		// Editor modes
+		bindKey(input, actions, "pressed 0", "deleteMode",
+			() -> mouseMode = "click");
+		bindKey(input, actions, "pressed 1", "solidMode",
+			() -> mouseMode = "solid");
+		bindKey(input, actions, "pressed 2", "obstacleMode",
+			() -> mouseMode = "obstacle");
+
+		// Other controls
+		bindKey(input, actions, "pressed G", "toggleGravity",
+			() -> gravity = !gravity);
+		bindKey(input, actions, "pressed P", "togglePlay",
+			() -> playMode = !playMode);
+		bindKey(input, actions, "pressed U", "uploadImage",
+			() -> {
+				String id = ImageManager.uploadImage();
+				if (id != null) {
+					updateAssetSidebar();
+				}
+			});
+	}
+
+	private void bindKey(
+		InputMap input,
+		ActionMap actions,
+		String keyStroke,
+		String actionName,
+		Runnable action
+	) {
+		input.put(KeyStroke.getKeyStroke(keyStroke), actionName);
+
+		actions.put(actionName, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				action.run();
 			}
-		}
-		if(keyChar=='g') {
-			gravity=!gravity;
-		}
-		if(keyChar=='p') {
-			playMode=!playMode;
-		}
+		});
 	}
-
-
-
-
-//DO NOT DELETE
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-		key= e.getKeyCode();
-		System.out.println(key);
-		
-		player.setMove(e.getKeyChar(), true, gravity);
-		System.out.println("key pressed: "+e.getKeyChar());
-		
-		if (key==KeyEvent.VK_SPACE) {
-			player.jump(gravity);
-		}
-	
-	}
-
-
-	//DO NOT DELETE
-	@Override
-	public void keyReleased(KeyEvent e) {
-		
-		player.setMove(e.getKeyChar(), false, gravity);
-		
-		
-	}
-
 
 
 	@Override

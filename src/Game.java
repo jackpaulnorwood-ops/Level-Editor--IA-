@@ -19,7 +19,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 	private Player player;
 	private String mouseMode;
 	private Rectangle leftColumn, playView, rightColumn;
-	private Boolean cursorInScreen, gravity;
+	private boolean cursorInScreen, gravity, playMode;
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
@@ -68,6 +68,7 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		mouseMode="click";
 		cursorInScreen=false;
 		gravity=true;
+		playMode = false;
 		gameTimer = new Timer(16, e -> updateGame());
 
 		leftColumn=new Rectangle(10, 10, w/6-15, h-20);
@@ -95,8 +96,11 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		assetScrollPane.setBounds(leftColumn);
 	}
 	private void updateGame() {
-		player.move(solids, gravity);
-		checks();
+		if(playMode) {
+			player.move(solids, gravity);
+			checks();
+		}
+
 		repaint();
 	}
 	
@@ -230,6 +234,9 @@ public class Game  extends JPanel implements KeyListener, MouseListener, MouseMo
 		}
 		if(keyChar=='g') {
 			gravity=!gravity;
+		}
+		if(keyChar=='p') {
+			playMode=!playMode;
 		}
 	}
 

@@ -12,7 +12,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	
 	private BufferedImage back; 
 	private int key, x, y, w, h; 
-	private Object obj;
+	private Object obj, selectedObject;
 	private Level level;
 	private Player player;
 	private String mouseMode;
@@ -58,12 +58,13 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		w=0;
 		h=0;
 		obj=new Object(new Rectangle(10,10,50,50), "blackSquare");
+		selectedObject=null;
 		level=new Level();
 		player=new Player(new Point(500, 100), 50, 100, "steve", 5, 1);
 		mouseMode="click";
 		cursorInScreen=false;
 		gravity=true;
-		playMode = false;
+		playMode=false;
 
 		setupKeyBindings();
 
@@ -120,6 +121,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		//g2d.drawImage(obj.getImage(), obj.getRect().x, obj.getRect().y, obj.getRect().width, obj.getRect().height, null);
 
 		drawObjects(g2d);
+		drawSelection(g2d);
+
 		drawPlayer(g2d);
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
@@ -129,6 +132,15 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	public void drawObjects(Graphics g) {
 		for(Object obj: level.getObjects()) {
 			drawImage(obj.getImageID(), obj.getRect(), g);
+		}
+	}
+
+	private void drawSelection(Graphics g) {
+		if(selectedObject!=null&&mouseMode.equals("click")) {
+			Rectangle rect=selectedObject.getRect();
+
+			g.setColor(Color.YELLOW);
+			g.drawRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2);
 		}
 	}
 
@@ -273,7 +285,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 
 	@Override
-	public void mouseDragged(MouseEvent arg0) {
+	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -281,10 +293,10 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 
 	@Override
-	public void mouseMoved(MouseEvent arg0) {
+	public void mouseMoved(MouseEvent e) {
 		// TODO Auto-generated method stub
-		x=arg0.getX();
-		y=arg0.getY();
+		x=e.getX();
+		y=e.getY();
 		obj.setX(x);
 		obj.setY(y);
 	}
@@ -292,36 +304,47 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
+	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
+		int mouseX=e.getX();
+		int mouseY=e.getY();
+
 		if(mouseMode.equals("click")) {
-			Rectangle clickRect=new Rectangle(x, y, 1, 1);
+			selectedObject=null;
+
 			for(int i = level.getObjects().size()-1; i>=0; i--) {
 				Object obj = level.getObjects().get(i);
-				if(clickRect.intersects(obj.getRect())) {
-					level.removeObject(obj);
+
+				if(obj.getRect().contains(mouseX, mouseY)) {
+					selectedObject=obj;
 					break;
 				}
 			}
 		}
+
 		if(mouseMode.equals("solid")) {
-			Solid sol=new Solid(new Rectangle(x-25,y-25,50,50), selectedImageID);
+			Solid sol=new Solid(new Rectangle(mouseX-25,mouseY-25,50,50), selectedImageID);
+
 			if(playView.contains(sol.getRect())) {
 				level.addSolid(sol);
 			}
 		}
+
 		if(mouseMode.equals("obstacle")) {
-			Obstacle obs=new Obstacle(new Rectangle(x-25,y-25,50,50), selectedImageID);
+			Obstacle obs=new Obstacle(new Rectangle(mouseX-25,mouseY-25,50,50), selectedImageID);
+
 			if(playView.contains(obs.getRect())) {
 				level.addObstacle(obs);
 			}
 		}
+
+		repaint();
 	}
 
 
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
+	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
 		System.out.println("entered");
 	}
@@ -329,7 +352,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 
 	@Override
-	public void mouseExited(MouseEvent arg0) {
+	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
 		System.out.println("exited");
 	}
@@ -337,19 +360,19 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 
 	@Override
-	public void mousePressed(MouseEvent arg0) {
+	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
-		System.out.println("you clicked at"+ arg0.getY());
-		x=arg0.getX();
-		y=arg0.getY();
+		System.out.println("you clicked at"+ e.getY());
+		x=e.getX();
+		y=e.getY();
 		
 	}
 
 
 
 	@Override
-	public void mouseReleased(MouseEvent arg0) {
+	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

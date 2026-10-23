@@ -12,12 +12,18 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	
 	private BufferedImage back; 
 	private int key, x, y, w, h; 
-	private Object obj, selectedObject;
+	private GameObject obj, selectedObject;
 	private Level level;
 	private Player player;
 	private String mouseMode;
 	private Rectangle leftColumn, playView, rightColumn;
-	private boolean cursorInScreen, gravity, playMode;
+	private boolean gravity, playMode;
+
+	private String resizing="";
+	private boolean dragging=false;
+	private int dragOffsetX, dragOffsetY;
+
+	private Rectangle topSizer, bottomSizer, leftSizer, rightSizer;
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
@@ -57,12 +63,11 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		y=0;
 		w=0;
 		h=0;
-		obj=new Object(new Rectangle(10,10,50,50), "blackSquare");
+		obj=new GameObject(new Rectangle(10,10,50,50), "blackSquare");
 		selectedObject=null;
 		level=new Level();
 		player=new Player(new Point(500, 100), 50, 100, "steve", 5, 1);
 		mouseMode="click";
-		cursorInScreen=false;
 		gravity=true;
 		playMode=false;
 
@@ -130,23 +135,45 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	}
 
 	public void drawObjects(Graphics g) {
-		for(Object obj: level.getObjects()) {
+		for(GameObject obj: level.getObjects()) {
 			drawImage(obj.getImageID(), obj.getRect(), g);
 		}
 	}
 
 	private void drawSelection(Graphics g) {
-		if(selectedObject!=null&&mouseMode.equals("click")) {
+		if(selectedObject!=null) {
 			Rectangle rect=selectedObject.getRect();
 
-			g.setColor(Color.YELLOW);
-			g.drawRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2);
+			if(mouseMode.equals("click")||mouseMode.equals("resize")) {
+				g.setColor(Color.YELLOW);
+				g.drawRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2);
+			}
+
+			if(mouseMode.equals("resize")) {
+				g.fillRect(rect.x+rect.width/2-4, rect.y-4, 8, 8);
+				g.fillRect(rect.x+rect.width/2-4, rect.y+rect.height-4, 8, 8);
+				g.fillRect(rect.x-4, rect.y+rect.height/2-4, 8, 8);
+				g.fillRect(rect.x+rect.width-4, rect.y+rect.height/2-4, 8, 8);
+			}
 		}
 	}
 
 	public void drawPlayer(Graphics g) {
 		g.setColor(Color.BLACK);
 		drawImage(player.getImageID(), player.getRect(), g);
+	}
+
+	public void updateSizer() {
+		if(selectedObject!=null) {
+			Rectangle rect=selectedObject.getRect();
+			topSizer=new Rectangle(rect.x+rect.width/2-4, rect.y-4, 8, 8);
+			bottomSizer=new Rectangle(rect.x+rect.width/2-4, rect.y+rect.height-4, 8, 8);
+			leftSizer=new Rectangle(rect.x-4, rect.y+rect.height/2-4, 8, 8);
+			rightSizer=new Rectangle(rect.x+rect.width-4, rect.y+rect.height/2-4, 8, 8);
+		}
+		else {
+			topSizer=bottomSizer=leftSizer=rightSizer=null;
+		}
 	}
 
 	public void resetPlayer() {
@@ -251,6 +278,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 			() -> mouseMode = "solid");
 		bindKey(input, actions, "pressed 2", "obstacleMode",
 			() -> mouseMode = "obstacle");
+		bindKey(input, actions, "pressed 3", "resizeMode",
+			() -> mouseMode = "resize");
 
 		// Other controls
 		bindKey(input, actions, "pressed G", "toggleGravity",
@@ -290,14 +319,24 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		int mouseX=e.getX();
 		int mouseY=e.getY();
 
-		if(selectedObject!=null) {
-			Rectangle objRect=selectedObject.getRect();
-
-			if(mouseMode.equals("click")&&objRect.contains(mouseX, mouseY)) {
-				selectedObject.setX(mouseX-objRect.width/2);
-				selectedObject.setY(mouseY-objRect.height/2);
-			}
+		if(dragging&&selectedObject!=null) {
+			selectedObject.setX(mouseX-dragOffsetX);
+			selectedObject.setY(mouseY-dragOffsetY);
 		}
+
+		Rectangle rect = selectedObject.getRect();
+
+		if (resizing.equals("right") && selectedObject != null) {
+			rect.width = Math.max(10, mouseX - rect.x);
+		}
+
+		if (resizing.equals("bottom") && selectedObject != null) {
+			rect.height = Math.max(10, mouseY - rect.y);
+		}
+
+		/* if (resizing.equals("left") && selectedObject != null) {
+			rect.x = 
+		} */
 
 		repaint();
 	}
@@ -325,7 +364,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 			selectedObject=null;
 
 			for(int i = level.getObjects().size()-1; i>=0; i--) {
-				Object obj = level.getObjects().get(i);
+				GameObject obj = level.getObjects().get(i);
 
 				if(obj.getRect().contains(mouseX, mouseY)) {
 					selectedObject=obj;
@@ -373,11 +412,37 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+		int mouseX=e.getX();
+		int mouseY=e.getY();
+
+		if(selectedObject==null) {
+			return;
+		}
+
+		updateSizer();
+
+		if(mouseMode.equals("resize")) {
+			if (rightSizer.contains(mouseX, mouseY)) {
+            	resizing = "right";
+			} else if (bottomSizer.contains(mouseX, mouseY)) {
+				resizing = "bottom";
+			} else if (leftSizer.contains(mouseX, mouseY)) {
+				resizing = "left";
+			} else if (topSizer.contains(mouseX, mouseY)) {
+				resizing = "top";
+			}
+		}
+
+		if(mouseMode.equals("click")&&selectedObject.getRect().contains(mouseX, mouseY)) {
+			Rectangle rect=selectedObject.getRect();
+
+			dragOffsetX=mouseX-rect.x;
+			dragOffsetY=mouseY-rect.y;
+
+			dragging=true;
+		}
+
 		
-		System.out.println("you clicked at"+ e.getY());
-		x=e.getX();
-		y=e.getY();
 		
 	}
 
@@ -386,7 +451,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+		dragging=false;
+		resizing="";
 	}
 	
 	

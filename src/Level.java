@@ -1,17 +1,17 @@
 import java.util.ArrayList;
 
 public class Level {
-    private ArrayList<Object> objects;
+    private ArrayList<GameObject> objects;
     private ArrayList<Solid> solids;
     private ArrayList<Obstacle> obstacles;
 
     public Level() {
-        objects=new ArrayList<Object>();
+        objects=new ArrayList<GameObject>();
         solids=new ArrayList<Solid>();
         obstacles=new ArrayList<Obstacle>();
     }
 
-    public void addObject(Object obj) {
+    public void addObject(GameObject obj) {
         objects.add(obj);
     }
 
@@ -25,13 +25,13 @@ public class Level {
         objects.add(obs);
     }
 
-    public void removeObject(Object obj) {
+    public void removeObject(GameObject obj) {
         objects.remove(obj);
         solids.remove(obj);
         obstacles.remove(obj);
     }
 
-    public ArrayList<Object> getObjects() {
+    public ArrayList<GameObject> getObjects() {
         return objects;
     }
 

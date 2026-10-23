@@ -1,10 +1,10 @@
 import java.awt.Rectangle;
 
-public class Object {
+public class GameObject {
     private Rectangle rect;
     private String imageID;
 
-    public Object(Rectangle rect, String imageID) {
+    public GameObject(Rectangle rect, String imageID) {
         this.rect=rect;
         this.imageID=imageID;
     }

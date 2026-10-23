@@ -2,7 +2,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-public class Player extends Object {
+public class Player extends GameObject {
     private static final int JUMP_BUFFER_FRAMES = 8;
     private int moveX=0;
     private int moveY=0;

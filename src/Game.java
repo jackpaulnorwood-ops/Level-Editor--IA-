@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +21,11 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	private int key, x, y, w, h; 
 	private GameObject obj, selectedObject;
 	private Level level;
+
 	private Player player;
+	private Point playerStartPosition = new Point(500, 100);
+	private Point playerStartSize = new Point(50, 100);
+
 	private String mouseMode;
 	private Rectangle leftColumn, playView, rightColumn;
 	private boolean gravity, playMode;
@@ -30,6 +38,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
+	private JButton playButton;
+
 	private Timer gameTimer;
 	private String selectedImageID = "brick";
 	
@@ -58,6 +68,13 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 		updateAssetSidebar();
 
+		playButton = new JButton("Play");
+		playButton.setFocusable(false);
+
+		playButton.addActionListener(e -> togglePlayMode());
+
+		add(playButton);
+
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 
@@ -69,7 +86,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		obj=new GameObject(new Rectangle(10,10,50,50), "blackSquare");
 		selectedObject=null;
 		level=new Level();
-		player=new Player(new Point(500, 100), 50, 100, "steve", 5, 1);
+		player=new Player(playerStartPosition, playerStartSize.x, playerStartSize.y, "steve", 5, 1);
 		mouseMode="click";
 		gravity=true;
 		playMode=false;
@@ -101,7 +118,21 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		rightColumn.setBounds((int)(w * 5.0 / 6.0) + 5, 10, w / 6 - 15, h - 20);
 
 		assetScrollPane.setBounds(leftColumn);
+		playButton.setBounds(rightColumn.x+10, rightColumn.y+10, rightColumn.width-20, 35);
 	}
+
+	private void togglePlayMode() {
+		playMode = !playMode;
+
+		if (playMode) {
+			playButton.setText("Stop");
+		} else {
+			playButton.setText("Play");
+		}
+
+		repaint();
+	}
+
 	private void updateGame() {
 		if(playMode) {
 			player.move(level.getSolids(), gravity);
@@ -180,8 +211,16 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	}
 
 	public void resetPlayer() {
-		player.setX(player.getSpawn().x);
-		player.setY(player.getSpawn().y);
+		player = new Player(
+			new Point(playerStartPosition),
+			playerStartSize.x,
+			playerStartSize.y,
+			"steve",
+			5,
+			1
+		);
+
+		repaint();
 	}
 
 	public void checks() {
@@ -212,6 +251,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 			// Create a button for this image
 			JButton button = new JButton(id);
+			button.setFocusable(false);
 
 			// Scale the thumbnail to fit the button
 			Image thumbnail = image.getScaledInstance(
@@ -242,7 +282,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		assetPanel.repaint();
 	}
 
-private void saveLevel() {
+	private void saveLevel() {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Save Level");
 
@@ -289,6 +329,71 @@ private void saveLevel() {
         }
     }
 }
+	
+	private void loadLevel() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Load Level");
+
+		int result = chooser.showOpenDialog(this);
+
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+
+			// Load into a temporary level first
+			Level loadedLevel = new Level();
+
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				String line;
+
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(",");
+
+					if (parts.length != 6) {
+						throw new IOException("Invalid line in level file.");
+					}
+
+					String type = parts[0];
+					String imageID = parts[1];
+
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int width = Integer.parseInt(parts[4]);
+					int height = Integer.parseInt(parts[5]);
+
+					Rectangle rect = new Rectangle(x, y, width, height);
+
+					if (type.equals("SOLID")) {
+						Solid sol = new Solid(rect, imageID);
+						loadedLevel.addSolid(sol);
+
+					} else if (type.equals("OBSTACLE")) {
+						Obstacle obs = new Obstacle(rect, imageID);
+						loadedLevel.addObstacle(obs);
+
+					} else if (type.equals("OBJECT")) {
+						GameObject obj = new GameObject(rect, imageID);
+						loadedLevel.addObject(obj);
+
+					} else {
+						throw new IOException("Unknown object type: " + type);
+					}
+				}
+
+				// Replace the current level only after loading succeeds
+				level = loadedLevel;
+				selectedObject = null;
+				repaint();
+
+				JOptionPane.showMessageDialog(this, "Level loaded successfully!");
+
+			} catch (IOException | NumberFormatException e) {
+				JOptionPane.showMessageDialog(
+					this,
+					"Error loading level: " + e.getMessage()
+				);
+			}
+		}
+	}
 
 	private void setupKeyBindings() {
 		InputMap input = getInputMap(
@@ -320,7 +425,7 @@ private void saveLevel() {
 
 		// Jump
 		bindKey(input, actions, "pressed SPACE", "jump",
-			() -> player.jump(gravity));
+			() -> {System.out.println("jump key triggered"); player.jump(gravity);});
 
 		// Editor modes
 		bindKey(input, actions, "pressed 0", "deleteMode",
@@ -336,7 +441,7 @@ private void saveLevel() {
 		bindKey(input, actions, "pressed G", "toggleGravity",
 			() -> gravity = !gravity);
 		bindKey(input, actions, "pressed P", "togglePlay",
-			() -> playMode = !playMode);
+			() -> playButton.doClick());
 		bindKey(input, actions, "pressed U", "uploadImage",
 			() -> {
 				String id = ImageManager.uploadImage();
@@ -344,8 +449,12 @@ private void saveLevel() {
 					updateAssetSidebar();
 				}
 			});
+		bindKey(input, actions, "pressed R", "resetPlayer",
+    		() -> resetPlayer());
 		bindKey(input, actions, "ctrl S", "saveLevel",
     		() -> saveLevel());
+		bindKey(input, actions, "ctrl O", "loadLevel",
+    		() -> loadLevel());
 	}
 
 	private void bindKey(
@@ -368,7 +477,10 @@ private void saveLevel() {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
+		if (playMode) {
+			return;
+		}
+
 		int mouseX=e.getX();
 		int mouseY=e.getY();
 
@@ -477,6 +589,10 @@ private void saveLevel() {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if (playMode) {
+			return;
+		}
+
 		int mouseX=e.getX();
 		int mouseY=e.getY();
 

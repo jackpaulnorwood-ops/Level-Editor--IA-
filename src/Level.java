@@ -11,6 +11,12 @@ public class Level {
         obstacles=new ArrayList<Obstacle>();
     }
 
+    public void clear() {
+        objects.clear();
+        solids.clear();
+        obstacles.clear();
+    }
+
     public void addObject(GameObject obj) {
         objects.add(obj);
     }

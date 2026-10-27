@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.IOException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -239,6 +242,54 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		assetPanel.repaint();
 	}
 
+private void saveLevel() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Save Level");
+
+    // Give the file a default name
+    chooser.setSelectedFile(new File("level.txt"));
+
+    int result = chooser.showSaveDialog(this);
+
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File file = chooser.getSelectedFile();
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+
+            for (GameObject obj : level.getObjects()) {
+                Rectangle rect = obj.getRect();
+                String type;
+
+                if (obj instanceof Solid) {
+                    type = "SOLID";
+                } else if (obj instanceof Obstacle) {
+                    type = "OBSTACLE";
+                } else {
+                    type = "OBJECT";
+                }
+
+                writer.println(
+                    type + "," +
+                    obj.getImageID() + "," +
+                    rect.x + "," +
+                    rect.y + "," +
+                    rect.width + "," +
+                    rect.height
+                );
+            }
+
+            JOptionPane.showMessageDialog(
+                this, "Level saved successfully!"
+            );
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(
+                this, "Error saving level: " + e.getMessage()
+            );
+        }
+    }
+}
+
 	private void setupKeyBindings() {
 		InputMap input = getInputMap(
 			JComponent.WHEN_IN_FOCUSED_WINDOW
@@ -293,6 +344,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 					updateAssetSidebar();
 				}
 			});
+		bindKey(input, actions, "ctrl S", "saveLevel",
+    		() -> saveLevel());
 	}
 
 	private void bindKey(

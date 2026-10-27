@@ -39,6 +39,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 	private JScrollPane assetScrollPane;
 	private JPanel assetPanel;
 	private JButton playButton;
+	private JPanel propertiesPanel;
+	private JTextField xField, yField, widthField, heightField;
 
 	private Timer gameTimer;
 	private String selectedImageID = "brick";
@@ -99,6 +101,9 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		playView=new Rectangle(w/6+5, 10, (int)(w*(4.0/6.0)-10), h-20);
 		rightColumn=new Rectangle((int)(w*(5.0/6.0)+5), 10, w/6-15, h-20);
 
+		createPropertiesPanel();
+		updateLayout();
+
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
@@ -118,17 +123,26 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		rightColumn.setBounds((int)(w * 5.0 / 6.0) + 5, 10, w / 6 - 15, h - 20);
 
 		assetScrollPane.setBounds(leftColumn);
+
 		playButton.setBounds(rightColumn.x+10, rightColumn.y+10, rightColumn.width-20, 35);
+		propertiesPanel.setBounds(rightColumn.x+10, rightColumn.y+60, rightColumn.width-20, 270);
+
+		revalidate();
+		repaint();
 	}
 
 	private void togglePlayMode() {
 		playMode = !playMode;
+
+		resetPlayer();
 
 		if (playMode) {
 			playButton.setText("Stop");
 		} else {
 			playButton.setText("Play");
 		}
+
+		updatePropertiesPanel();
 
 		repaint();
 	}
@@ -162,7 +176,9 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		drawObjects(g2d);
 		drawSelection(g2d);
 
-		drawPlayer(g2d);
+		if (playMode) {
+			drawPlayer(g2d);
+		}
 
 		g2d.drawString(String.format("(%d, %d)", x, y), x, y);
 
@@ -282,6 +298,107 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		assetPanel.repaint();
 	}
 
+	private void createPropertiesPanel() {
+		propertiesPanel = new JPanel(new BorderLayout(5, 5));
+		propertiesPanel.setBackground(Color.LIGHT_GRAY);
+		propertiesPanel.setBorder(
+			BorderFactory.createTitledBorder("Object Properties")
+		);
+
+		JPanel fieldsPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+
+		fieldsPanel.add(new JLabel("X:"));
+		xField = new JTextField("0", 5);
+		fieldsPanel.add(xField);
+
+		fieldsPanel.add(new JLabel("Y:"));
+		yField = new JTextField("0", 5);
+		fieldsPanel.add(yField);
+
+		fieldsPanel.add(new JLabel("Width:"));
+		widthField = new JTextField("50", 5);
+		fieldsPanel.add(widthField);
+
+		fieldsPanel.add(new JLabel("Height:"));
+		heightField = new JTextField("50", 5);
+		fieldsPanel.add(heightField);
+
+		propertiesPanel.add(fieldsPanel, BorderLayout.CENTER);
+
+		JButton applyButton = new JButton("Apply");
+		applyButton.setFocusable(false);
+		applyButton.addActionListener(e -> applyProperties());
+
+		propertiesPanel.add(applyButton, BorderLayout.SOUTH);
+
+		add(propertiesPanel);
+
+		updatePropertiesPanel();
+
+		propertiesPanel.revalidate();
+		propertiesPanel.repaint();
+	}
+
+	private void updatePropertiesPanel() {
+		boolean enabled = selectedObject != null && !playMode;
+
+		xField.setEnabled(enabled);
+		yField.setEnabled(enabled);
+		widthField.setEnabled(enabled);
+		heightField.setEnabled(enabled);
+
+		if (selectedObject == null) {
+			xField.setText("");
+			yField.setText("");
+			widthField.setText("");
+			heightField.setText("");
+			return;
+		}
+
+		Rectangle rect = selectedObject.getRect();
+
+		xField.setText(String.valueOf(rect.x));
+		yField.setText(String.valueOf(rect.y));
+		widthField.setText(String.valueOf(rect.width));
+		heightField.setText(String.valueOf(rect.height));
+	}
+
+	private void applyProperties() {
+		if (selectedObject == null || playMode) {
+			return;
+		}
+
+		try {
+			int x = Integer.parseInt(xField.getText());
+			int y = Integer.parseInt(yField.getText());
+			int width = Integer.parseInt(widthField.getText());
+			int height = Integer.parseInt(heightField.getText());
+
+			if (width <= 0 || height <= 0) {
+				JOptionPane.showMessageDialog(
+					this, "Width and height must be positive."
+				);
+				return;
+			}
+
+			Rectangle rect = selectedObject.getRect();
+
+			Rectangle newRect = new Rectangle(x, y, width, height);
+			newRect = keepInsideLevel(newRect);
+
+			rect.setBounds(newRect);
+			updatePropertiesPanel();
+			repaint();
+
+			repaint();
+
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(
+				this, "Please enter valid whole numbers."
+			);
+		}
+	}
+
 	private void saveLevel() {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Save Level");
@@ -395,6 +512,21 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		}
 	}
 
+	private Rectangle keepInsideLevel(Rectangle rect) {
+		int minX = playView.x;
+		int minY = playView.y;
+		int maxX = playView.x + playView.width;
+		int maxY = playView.y + playView.height;
+
+		int width = Math.min(rect.width, playView.width);
+		int height = Math.min(rect.height, playView.height);
+
+		int x = Math.max(minX, Math.min(rect.x, maxX - width));
+		int y = Math.max(minY, Math.min(rect.y, maxY - height));
+
+		return new Rectangle(x, y, width, height);
+	}
+
 	private void setupKeyBindings() {
 		InputMap input = getInputMap(
 			JComponent.WHEN_IN_FOCUSED_WINDOW
@@ -487,6 +619,9 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		if(dragging&&selectedObject!=null) {
 			selectedObject.setX(mouseX-dragOffsetX);
 			selectedObject.setY(mouseY-dragOffsetY);
+
+			Rectangle corrected = keepInsideLevel(selectedObject.getRect());
+			selectedObject.getRect().setBounds(corrected);
 		}
 
 		if(selectedObject!=null) {
@@ -494,10 +629,15 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 			if (resizing.equals("right") && selectedObject != null) {
 				rect.width = Math.max(10, mouseX - rect.x);
+
+				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
+				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("bottom") && selectedObject != null) {
 				rect.height = Math.max(10, mouseY - rect.y);
+				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
+				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("left")) {
@@ -505,6 +645,9 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 				rect.x = Math.min(mouseX, rightEdge - 10);
 				rect.width = rightEdge - rect.x;
+
+				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
+				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("top")) {
@@ -512,8 +655,13 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 				rect.y = Math.min(mouseY, bottomEdge - 10);
 				rect.height = bottomEdge - rect.y;
+
+				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
+				selectedObject.getRect().setBounds(corrected);
 			}
 		}
+
+		updatePropertiesPanel();
 
 		repaint();
 	}
@@ -565,6 +713,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 				level.addObstacle(obs);
 			}
 		}
+
+		updatePropertiesPanel();
 
 		repaint();
 	}

@@ -383,12 +383,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 			Rectangle rect = selectedObject.getRect();
 
-			Rectangle newRect = new Rectangle(x, y, width, height);
-			newRect = keepInsideLevel(newRect);
-
-			rect.setBounds(newRect);
-			updatePropertiesPanel();
-			repaint();
+			rect.setBounds(x, y, width, height);
 
 			repaint();
 
@@ -512,21 +507,6 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		}
 	}
 
-	private Rectangle keepInsideLevel(Rectangle rect) {
-		int minX = playView.x;
-		int minY = playView.y;
-		int maxX = playView.x + playView.width;
-		int maxY = playView.y + playView.height;
-
-		int width = Math.min(rect.width, playView.width);
-		int height = Math.min(rect.height, playView.height);
-
-		int x = Math.max(minX, Math.min(rect.x, maxX - width));
-		int y = Math.max(minY, Math.min(rect.y, maxY - height));
-
-		return new Rectangle(x, y, width, height);
-	}
-
 	private void setupKeyBindings() {
 		InputMap input = getInputMap(
 			JComponent.WHEN_IN_FOCUSED_WINDOW
@@ -619,9 +599,6 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		if(dragging&&selectedObject!=null) {
 			selectedObject.setX(mouseX-dragOffsetX);
 			selectedObject.setY(mouseY-dragOffsetY);
-
-			Rectangle corrected = keepInsideLevel(selectedObject.getRect());
-			selectedObject.getRect().setBounds(corrected);
 		}
 
 		if(selectedObject!=null) {
@@ -629,15 +606,10 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 			if (resizing.equals("right") && selectedObject != null) {
 				rect.width = Math.max(10, mouseX - rect.x);
-
-				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
-				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("bottom") && selectedObject != null) {
 				rect.height = Math.max(10, mouseY - rect.y);
-				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
-				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("left")) {
@@ -645,9 +617,6 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 				rect.x = Math.min(mouseX, rightEdge - 10);
 				rect.width = rightEdge - rect.x;
-
-				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
-				selectedObject.getRect().setBounds(corrected);
 			}
 
 			else if (resizing.equals("top")) {
@@ -655,9 +624,6 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 
 				rect.y = Math.min(mouseY, bottomEdge - 10);
 				rect.height = bottomEdge - rect.y;
-
-				Rectangle corrected = keepInsideLevel(selectedObject.getRect());
-				selectedObject.getRect().setBounds(corrected);
 			}
 		}
 

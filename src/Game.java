@@ -512,6 +512,16 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 		}
 	}
 
+	private void deleteObject() {
+		if (selectedObject != null && !playMode) {
+            level.getObjects().remove(selectedObject);
+            selectedObject = null;
+
+            updatePropertiesPanel();
+            repaint();
+        }
+	}
+
 	private Rectangle keepInsideLevel(Rectangle rect) {
 		int minX = playView.x;
 		int minY = playView.y;
@@ -560,7 +570,7 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 			() -> {System.out.println("jump key triggered"); player.jump(gravity);});
 
 		// Editor modes
-		bindKey(input, actions, "pressed 0", "deleteMode",
+		bindKey(input, actions, "pressed 0", "clickMode",
 			() -> mouseMode = "click");
 		bindKey(input, actions, "pressed 1", "solidMode",
 			() -> mouseMode = "solid");
@@ -581,6 +591,8 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 					updateAssetSidebar();
 				}
 			});
+		bindKey(input, actions, "pressed DELETE", "deleteObject",
+			() -> deleteObject());
 		bindKey(input, actions, "pressed R", "resetPlayer",
     		() -> resetPlayer());
 		bindKey(input, actions, "ctrl S", "saveLevel",

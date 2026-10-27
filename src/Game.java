@@ -324,19 +324,31 @@ public class Game  extends JPanel implements MouseListener, MouseMotionListener{
 			selectedObject.setY(mouseY-dragOffsetY);
 		}
 
-		Rectangle rect = selectedObject.getRect();
+		if(selectedObject!=null) {
+			Rectangle rect = selectedObject.getRect();
 
-		if (resizing.equals("right") && selectedObject != null) {
-			rect.width = Math.max(10, mouseX - rect.x);
+			if (resizing.equals("right") && selectedObject != null) {
+				rect.width = Math.max(10, mouseX - rect.x);
+			}
+
+			else if (resizing.equals("bottom") && selectedObject != null) {
+				rect.height = Math.max(10, mouseY - rect.y);
+			}
+
+			else if (resizing.equals("left")) {
+				int rightEdge = rect.x + rect.width;
+
+				rect.x = Math.min(mouseX, rightEdge - 10);
+				rect.width = rightEdge - rect.x;
+			}
+
+			else if (resizing.equals("top")) {
+				int bottomEdge = rect.y + rect.height;
+
+				rect.y = Math.min(mouseY, bottomEdge - 10);
+				rect.height = bottomEdge - rect.y;
+			}
 		}
-
-		if (resizing.equals("bottom") && selectedObject != null) {
-			rect.height = Math.max(10, mouseY - rect.y);
-		}
-
-		/* if (resizing.equals("left") && selectedObject != null) {
-			rect.x = 
-		} */
 
 		repaint();
 	}
